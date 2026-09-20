@@ -181,17 +181,29 @@ function renderAnswer(rawText) {
     return;
   }
 
-  // Simple Markdown parsing for headers, bullets, bold
-  let formatted = rawText
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-    .replace(/^\* (.*$)/gim, '<li>$1</li>')
-    .replace(/^- (.*$)/gim, '<li>$1</li>')
-    .replace(/\n\n/gim, '<br><br>');
+  // Chuẩn hóa và làm sạch chuỗi
+  let text = rawText.trim();
 
-  answerBody.innerHTML = formatted;
+  // Parse markdown headers
+  text = text
+    .replace(/^### (.*$)/gim, '<h4 style="margin: 12px 0 6px 0; color: var(--accent); font-weight: 600;">$1</h4>')
+    .replace(/^## (.*$)/gim, '<h3 style="margin: 14px 0 8px 0; color: #fff; font-weight: 600;">$1</h3>')
+    .replace(/^# (.*$)/gim, '<h2 style="margin: 16px 0 10px 0; color: #fff; font-weight: 700;">$1</h2>');
+
+  // In đậm
+  text = text.replace(/\*\*(.*?)\*\*/gim, '<strong style="color: #38bdf8;">$1</strong>');
+
+  // Danh sách gạch đầu dòng
+  text = text.replace(/^[\*\-] (.*$)/gim, '<li style="margin-bottom: 6px; line-height: 1.6;">$1</li>');
+
+  // Bọc các nhóm <li> vào <ul>
+  text = text.replace(/(<li.*<\/li>(\s*<li.*<\/li>)*)/gim, '<ul style="padding-left: 20px; margin: 10px 0;">$1</ul>');
+
+  // Ngắt đoạn văn bản
+  text = text.replace(/\n\n+/g, '</p><p style="margin-bottom: 12px; line-height: 1.65;">');
+  text = text.replace(/\n/g, '<br>');
+
+  answerBody.innerHTML = `<div style="line-height: 1.65; font-size: 0.95rem; color: #e2e8f0;"><p style="margin-bottom: 12px; line-height: 1.65;">${text}</p></div>`;
 }
 
 function renderChunks(results) {

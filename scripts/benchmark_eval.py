@@ -94,11 +94,17 @@ def make_llm_fn() -> tuple[Callable[[str], str], str]:
             if line.startswith("Question:"):
                 is_context = False
                 break
-            if is_context and line.strip():
-                context_lines.append(line.strip())
+            if is_context and line.strip() and not line.strip().startswith("---"):
+                cleaned = re.sub(r"^#{1,6}\s*", "", line.strip())
+                if cleaned:
+                    context_lines.append(cleaned)
 
-        context_snippet = " ".join(context_lines[:4])[:350]
-        return f"[RAG Answer từ Context]: {context_snippet}..."
+        if context_lines:
+            snippet = " ".join(context_lines[:5])
+            if len(snippet) > 450:
+                snippet = snippet[:450] + "..."
+            return f"Dựa trên tài liệu quy định và chính sách của cửa hàng:\n\n{snippet}"
+        return "Hiện chưa tìm thấy thông tin phù hợp trong cơ sở dữ liệu chính sách."
 
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if api_key and api_key.strip() and api_key != "your_gemini_api_key_here":
@@ -106,18 +112,26 @@ def make_llm_fn() -> tuple[Callable[[str], str], str]:
             from google import genai
             client = genai.Client(api_key=api_key.strip())
             # Ưu tiên các model flash-lite có quota free tier dồi dào
+            preferred_model = os.getenv("GEMINI_LLM_MODEL", "gemini-3.5-flash-lite")
             candidate_models = [
-                os.getenv("GEMINI_LLM_MODEL", "gemini-3.5-flash-lite"),
+                preferred_model,
+                "gemini-3.5-flash-lite",
+                "gemini-flash-lite-latest",
+                "gemini-3.1-flash-lite",
                 "gemini-3.5-flash",
                 "gemini-3.6-flash",
             ]
+            seen = set()
+            candidate_models = [m for m in candidate_models if not (m in seen or seen.add(m))]
 
             def gemini_answer(prompt: str) -> str:
                 system_prompt = (
                     "Bạn là chuyên viên tư vấn khách hàng cao cấp về chính sách thương mại điện tử và bảo hành. "
                     "Hãy đọc kỹ phần 'Context' được cung cấp và trả lời câu hỏi của người dùng một cách tự nhiên, "
-                    "đầy đủ, ấm áp, có hồn và chuyên nghiệp bằng tiếng Việt. "
+                    "đầy đủ, chu đáo, có hồn và chuyên nghiệp bằng tiếng Việt. "
                     "Trích dẫn các con số, thời hạn, điều kiện bảo hành cụ thể được nêu trong Context. "
+                    "Hãy định dạng câu trả lời rõ ràng với các gạch đầu dòng hoặc đoạn văn ngắn gọn, dễ đọc. "
+                    "Tuyệt đối không để lại các ký tự thô hay markdown tiêu đề thừa thãi. "
                     "Nếu Context không có thông tin, hãy lịch sự thông báo cho khách hàng."
                 )
                 full_content = f"{system_prompt}\n\n{prompt}"
@@ -133,7 +147,7 @@ def make_llm_fn() -> tuple[Callable[[str], str], str]:
                     except Exception as ex:
                         err_str = str(ex).lower()
                         if "429" in err_str or "quota" in err_str or "not_found" in err_str:
-                            time.sleep(2)
+                            time.sleep(1)
                             continue  # Thử model tiếp theo
                         else:
                             break
@@ -141,7 +155,7 @@ def make_llm_fn() -> tuple[Callable[[str], str], str]:
                 # Fallback trích xuất thông minh từ context nếu tất cả API tạm hết quota
                 return fallback_answer(prompt)
 
-            return gemini_answer, f"Google Gemini (gemini-3.5-flash-lite)"
+            return gemini_answer, f"Google Gemini ({preferred_model})"
         except Exception as err:
             print(f"[!] Lỗi khi kết nối Gemini API: {err}", file=sys.stderr)
 
