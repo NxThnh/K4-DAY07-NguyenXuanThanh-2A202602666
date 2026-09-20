@@ -3,7 +3,7 @@
 Script kiểm chứng 5 câu hỏi benchmark và lọc metadata trên kho tài liệu TMĐT thực tế (Phase 2 - K4-L3B).
 
 Chạy bằng lệnh:
-    python scripts/benchmark_eval.py
+    python scripts/bench.py
 """
 
 from dataclasses import dataclass

@@ -35,7 +35,7 @@ from src import (
     RecursiveChunker,
     EmbeddingStore,
 )
-from scripts.benchmark_eval import (
+from scripts.bench import (
     load_and_chunk_corpus,
     make_embedder_fn,
     make_llm_fn,
