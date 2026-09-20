@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 07 — Demo RAG & Vector Store: Chính Sách TMĐT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Background Glow Orbs -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <!-- Header Section -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="title">Lab 07 — RAG & Semantic Vector Store</h1>
+        <p class="subtitle">Phân hệ K4-L3B: Nền tảng Dữ liệu Chính sách Thương mại Điện tử</p>
+      </div>
+    </div>
+    
+    <div class="user-badge">
+      <div class="avatar">NT</div>
+      <div class="user-info">
+        <span class="user-name">Nguyễn Xuân Thành</span>
+        <span class="user-id">MSSV: 2A202602666 • Nhóm L3B</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="tab-rag">
+      <span class="tab-icon">🤖</span>
+      <span>Hỏi Đáp RAG & Benchmark</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-chunking">
+      <span class="tab-icon">✂️</span>
+      <span>So Sánh Chiến Lược Chunking</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-corpus">
+      <span class="tab-icon">📊</span>
+      <span>Kho Dữ Liệu & Data Governance</span>
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- ==================== TAB 1: RAG & BENCHMARK ==================== -->
+    <section id="tab-rag" class="tab-panel active">
+      
+      <!-- Top Control Bar -->
+      <div class="control-card glass-panel">
+        <div class="benchmark-header">
+          <div class="section-badge">✨ 5 Câu Hỏi Benchmark Chuẩn</div>
+          <button id="btn-ab-compare" class="action-btn secondary">
+            <span>⚖️ Minh chứng lọc Metadata (Câu 3)</span>
+          </button>
+        </div>
+        
+        <div class="chips-container" id="benchmark-chips">
+          <!-- Rendered via JS -->
+        </div>
+
+        <form id="rag-form" class="query-box">
+          <div class="input-wrapper">
+            <input type="text" id="query-input" placeholder="Nhập câu hỏi chính sách (hoặc bấm chọn câu benchmark ở trên)..." autocomplete="off" required>
+            <button type="submit" id="btn-submit" class="action-btn primary">
+              <span>Hỏi Trợ Lý AI</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+
+          <div class="filters-bar">
+            <span class="filter-label">🎯 Lọc Metadata (Audience):</span>
+            <label class="radio-chip">
+              <input type="radio" name="audience-filter" value="" checked>
+              <span>Toàn bộ kho (Không lọc)</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="audience-filter" value="buyer">
+              <span>Khách lẻ (buyer)</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="audience-filter" value="seller">
+              <span>Đối tác B2B (seller)</span>
+            </label>
+            <div class="engine-badge">
+              <span>⚡ Google Gemini 3.5 + Embedding-001 (3072 dims)</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- A/B Comparison Modal / Panel -->
+      <div id="ab-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+          <div class="modal-header">
+            <h3>⚖️ Minh Chứng Hiệu Quả Của Metadata Filtering (Câu Hỏi 3 - Mua Sỉ Doanh Nghiệp)</h3>
+            <button id="btn-close-ab" class="close-btn">&times;</button>
+          </div>
+          <div class="ab-grid">
+            <div class="ab-column column-no-filter">
+              <div class="column-header">
+                <h4>1. KHI KHÔNG LỌC METADATA</h4>
+                <span class="badge warning">Không áp dụng filter</span>
+              </div>
+              <div class="ab-explanation">
+                Toàn bộ các chunk trong kho cạnh tranh điểm số. Nếu có các tài liệu khách lẻ chứa từ khóa giảm giá, kết quả có thể bị lẫn lộn.
+              </div>
+              <div id="ab-results-no-filter" class="chunk-list-mini">
+                <!-- Mini chunks -->
+              </div>
+            </div>
+
+            <div class="ab-column column-with-filter">
+              <div class="column-header">
+                <h4>2. KHI CÓ LỌC METADATA</h4>
+                <span class="badge success">filter={"audience": "seller"}</span>
+              </div>
+              <div class="ab-explanation">
+                Cô lập triệt để 100% tài liệu người mua cá nhân. Chỉ quét trên các điều khoản hợp tác đối tác & bán buôn B2B!
+              </div>
+              <div id="ab-results-with-filter" class="chunk-list-mini">
+                <!-- Mini chunks -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split Results Screen -->
+      <div class="split-view">
+        
+        <!-- Left: AI Answer -->
+        <div class="glass-panel answer-card">
+          <div class="panel-header">
+            <div class="header-left">
+              <div class="status-indicator"></div>
+              <h3>Câu Trả Lời Trợ Lý AI (RAG Agent)</h3>
+            </div>
+            <span id="response-time" class="time-badge">Chưa chạy</span>
+          </div>
+
+          <div id="answer-content" class="answer-body">
+            <div class="empty-state">
+              <div class="empty-icon">💬</div>
+              <p>Hãy chọn một trong 5 câu hỏi benchmark ở trên hoặc nhập câu hỏi bất kỳ để trải nghiệm hệ thống RAG thời gian thực.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Retrieved Chunks Inspector -->
+        <div class="glass-panel inspector-card">
+          <div class="panel-header">
+            <div class="header-left">
+              <span class="inspector-icon">🔍</span>
+              <h3>Top Chunks Truy Xuất Từ Vector Store</h3>
+            </div>
+            <span id="chunks-count" class="badge neutral">0 chunks</span>
+          </div>
+
+          <div id="chunks-container" class="chunks-feed">
+            <div class="empty-state">
+              <div class="empty-icon">📚</div>
+              <p>Các đoạn văn bản liên quan nhất cùng điểm Cosine Similarity sẽ hiển thị tại đây khi truy xuất.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: CHUNKING VISUALIZER ==================== -->
+    <section id="tab-chunking" class="tab-panel">
+      <div class="glass-panel chunk-strategy-card">
+        <div class="panel-header">
+          <div>
+            <h3>So Sánh Trực Quan Các Chiến Lược Chia Nhỏ Văn Bản (Chunking Strategies)</h3>
+            <p class="subtitle">Thử nghiệm trên tài liệu bảng biểu (Điện Thoại Vui) vs văn bản quy chế (CellphoneS)</p>
+          </div>
+          <div class="strategy-actions">
+            <select id="sample-text-select" class="custom-select">
+              <option value="dienthoaivui">Văn bản 1: Điện Thoại Vui (Nhiều bảng thời hạn bảo hành)</option>
+              <option value="apple">Văn bản 2: CellphoneS (Quy trình bóc seal Apple)</option>
+            </select>
+            <button id="btn-run-chunk-compare" class="action-btn primary">
+              <span>Chạy So Sánh 4 Chiến Lược</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="strategies-grid">
+          
+          <!-- Strategy 1: FixedSize -->
+          <div class="strategy-col">
+            <div class="col-head head-fixed">
+              <h4>FixedSizeChunker</h4>
+              <span class="badge neutral">500 ký tự</span>
+            </div>
+            <div class="stats-row" id="stats-fixed">
+              <span>Số chunk: <strong>--</strong></span>
+              <span>Độ dài TB: <strong>--</strong></span>
+            </div>
+            <div class="evaluation-note bad">
+              ⚠️ <strong>Nhược điểm:</strong> Cắt ngang xương bảng biểu, tách rời tên linh kiện và thời gian bảo hành.
+            </div>
+            <div class="chunks-scroll" id="chunks-fixed"></div>
+          </div>
+
+          <!-- Strategy 2: Sentence -->
+          <div class="strategy-col">
+            <div class="col-head head-sentence">
+              <h4>SentenceChunker</h4>
+              <span class="badge neutral">3 câu / chunk</span>
+            </div>
+            <div class="stats-row" id="stats-sentence">
+              <span>Số chunk: <strong>--</strong></span>
+              <span>Độ dài TB: <strong>--</strong></span>
+            </div>
+            <div class="evaluation-note neutral">
+              ⚠️ <strong>Nhược điểm:</strong> Bảng biểu không có dấu chấm câu chuẩn nên ngắt quãng lộn xộn.
+            </div>
+            <div class="chunks-scroll" id="chunks-sentence"></div>
+          </div>
+
+          <!-- Strategy 3: Recursive -->
+          <div class="strategy-col">
+            <div class="col-head head-recursive">
+              <h4>RecursiveChunker</h4>
+              <span class="badge neutral">1200 ký tự</span>
+            </div>
+            <div class="stats-row" id="stats-recursive">
+              <span>Số chunk: <strong>--</strong></span>
+              <span>Độ dài TB: <strong>--</strong></span>
+            </div>
+            <div class="evaluation-note good">
+              ✅ <strong>Ưu điểm:</strong> Tôn trọng khối ngắt đoạn \n\n, giữ trọn vẹn từng bảng dịch vụ.
+            </div>
+            <div class="chunks-scroll" id="chunks-recursive"></div>
+          </div>
+
+          <!-- Strategy 4: SectionChunker (Custom) -->
+          <div class="strategy-col highlight-col">
+            <div class="col-head head-section">
+              <h4>Custom SectionChunker</h4>
+              <span class="badge accent">Đề mục I, II, III</span>
+            </div>
+            <div class="stats-row" id="stats-section">
+              <span>Số chunk: <strong>--</strong></span>
+              <span>Độ dài TB: <strong>--</strong></span>
+            </div>
+            <div class="evaluation-note best">
+              ⭐ <strong>Tối ưu nhất:</strong> Giữ nguyên vẹn toàn bộ bảng linh kiện và tiêu đề phân loại!
+            </div>
+            <div class="chunks-scroll" id="chunks-section"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: DATA INVENTORY ==================== -->
+    <section id="tab-corpus" class="tab-panel">
+      <div class="glass-panel corpus-card">
+        <div class="panel-header">
+          <div>
+            <h3>Quản Trị Dữ Liệu & Thống Kê Làm Sạch (Data Governance & Cleaning)</h3>
+            <p class="subtitle">Minh chứng loại bỏ 80–90% rác từ bình luận và menu theo hướng dẫn docs/DATA_COLLECTION.md</p>
+          </div>
+          <span class="badge success">6 Tài liệu thực tế • 20 Clean Chunks</span>
+        </div>
+
+        <div class="inventory-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tài Liệu Chính Sách</th>
+                <th>Đối Tượng (Audience)</th>
+                <th>Phân Loại (Category)</th>
+                <th>Kích Thước Thô</th>
+                <th>Sau Làm Sạch</th>
+                <th>Tỷ Lệ Lọc Rác</th>
+                <th>Phiên Bản</th>
+                <th>Nguồn Công Khai</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="governance-cards">
+          <div class="gov-card">
+            <h4>🧹 Hiệu Quả Làm Sạch (Data Cleaning)</h4>
+            <p>File Điện Thoại Vui giảm từ 31.204 ký tự xuống còn 3.310 ký tự nhờ cắt bỏ 264 bình luận hỏi đáp và chân trang SEO. Điểm truy xuất Top-1 tăng vọt từ <strong>0.71 lên 0.89</strong>.</p>
+          </div>
+          <div class="gov-card">
+            <h4>🎯 Phân Định Audience Rõ Ràng</h4>
+            <p>Không dùng chung nhãn <code>audience: both</code>. Tách biệt rõ ràng <code>buyer</code> (người mua/sửa chữa) và <code>seller</code> (đối tác B2B) để bộ lọc metadata hoạt động có ý nghĩa A/B thực tế.</p>
+          </div>
+          <div class="gov-card">
+            <h4>📑 Phiên Bản Không Suy Đoán</h4>
+            <p>Ghi đúng quy chuẩn <code>document_version: not-stated</code> do các trang web bán lẻ không công bố số hiệu phiên bản chính thức.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

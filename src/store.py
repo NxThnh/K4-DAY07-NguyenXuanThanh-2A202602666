@@ -28,7 +28,8 @@ class EmbeddingStore:
         self._next_index = 0
 
         try:
-            import chromadb
+            # pyrefly: ignore [missing-import]
+            import chromadb    
 
             self._client = chromadb.Client()
             self._collection = self._client.get_or_create_collection(
