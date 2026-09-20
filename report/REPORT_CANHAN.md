@@ -1,7 +1,7 @@
 # Báo Cáo Cá Nhân — Lab 7: Embedding & Vector Store
 
 **Họ tên:** Nguyễn Xuân Thành  
-**Nhóm:** Nhóm K4-L3B (Chính sách Thương mại Điện tử)  
+**Nhóm:** LaoGaKho
 **Mã Sinh Viên:** 2A202602666  
 **Ngày:** 20/09/2026  
 

@@ -1,7 +1,13 @@
 # Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
 
-**Nhóm:** Nhóm K4-L3B (Chính sách Thương mại Điện tử)  
-**Thành viên:** Nguyễn Xuân Thành (Nhóm trưởng) cùng các thành viên nhóm L3B  
+**Nhóm:** LaoGaKho
+
+**Thành viên:** 
+- Nguyễn Xuân Thành - 2A202602666
+- Nguyễn Văn Xuân Lộc - 2A202602870
+- Bùi Hải Nam - 2A202602636
+- Lê Đức Hùng - 2A202602849
+
 **Ngày:** 20/09/2026  
 
 > **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
